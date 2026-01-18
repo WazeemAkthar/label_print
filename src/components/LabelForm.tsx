@@ -8,7 +8,7 @@ import { Slider } from '@/components/ui/slider';
 import { Shuffle, RotateCcw, Type } from 'lucide-react';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { useState, useEffect } from 'react';
-import { ChevronDown, ChevronUp } from 'lucide-react';
+import { ChevronDown, ChevronUp } from 'lucide-react'; // Force rebuild
 import CustomSizeDialog from './CustomSizeDialog';
 
 interface LabelFormProps {
