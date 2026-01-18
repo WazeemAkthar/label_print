@@ -28,9 +28,9 @@ const Index = () => {
   const [templates, setTemplates] = useState<LabelTemplate[]>([]);
   const [templateName, setTemplateName] = useState('');
   const [saveDialogOpen, setSaveDialogOpen] = useState(false);
+  const [editingTemplate, setEditingTemplate] = useState<LabelTemplate | null>(null);
   const printRef = useRef<HTMLDivElement>(null);
 
-  // Load templates on mount
   useEffect(() => {
     setTemplates(getTemplates());
   }, []);
@@ -52,17 +52,26 @@ const Index = () => {
     }
 
     const template: LabelTemplate = {
-      id: generateTemplateId(),
+      id: editingTemplate?.id || generateTemplateId(),
       name: templateName.trim(),
       data: { ...labelData },
-      createdAt: Date.now(),
+      createdAt: editingTemplate?.createdAt || Date.now(),
+      updatedAt: editingTemplate ? Date.now() : undefined,
     };
 
     saveTemplate(template);
     setTemplates(getTemplates());
     setTemplateName('');
+    setEditingTemplate(null);
     setSaveDialogOpen(false);
-    toast.success(`Template "${template.name}" saved`);
+    toast.success(editingTemplate ? `Template "${template.name}" updated` : `Template "${template.name}" saved`);
+  };
+
+  const handleEditTemplate = (template: LabelTemplate) => {
+    setLabelData(template.data);
+    setTemplateName(template.name);
+    setEditingTemplate(template);
+    setSaveDialogOpen(true);
   };
 
   const handleLoadTemplate = (data: LabelData) => {
@@ -71,6 +80,14 @@ const Index = () => {
 
   const handleDeleteTemplate = (id: string) => {
     setTemplates(templates.filter(t => t.id !== id));
+  };
+
+  const handleDialogClose = (open: boolean) => {
+    if (!open) {
+      setEditingTemplate(null);
+      setTemplateName('');
+    }
+    setSaveDialogOpen(open);
   };
 
   const handlePrint = () => {
@@ -85,28 +102,25 @@ const Index = () => {
       return;
     }
 
-    // Create print content with exact mm sizing
     const pxPerMm = 3.78;
     const widthPx = selectedSize.width * pxPerMm;
     const heightPx = selectedSize.height * pxPerMm;
 
-    // Generate multiple labels
     const labelsHtml = Array(quantity).fill(null).map((_, i) => `
       <div class="label" ${i > 0 ? 'style="page-break-before: always;"' : ''}>
-        <div class="shop-name">${labelData.shopName}</div>
-        <div class="product-name">${labelData.productName}</div>
-        <div class="dates">
+        <div class="shop-name" style="font-size: ${labelData.fontSizes.shopName}px;">${labelData.shopName}</div>
+        <div class="product-name" style="font-size: ${labelData.fontSizes.productName}px;">${labelData.productName}</div>
+        <div class="dates" style="font-size: ${labelData.fontSizes.dates}px;">
           <span>MFG: ${formatDateForPrint(labelData.mfgDate)}</span>
           <span>EXP: ${formatDateForPrint(labelData.expDate)}</span>
         </div>
         <div class="barcode-container">
           <svg id="barcode-${i}"></svg>
         </div>
-        <div class="price">${labelData.currency} ${labelData.price}</div>
+        <div class="price" style="font-size: ${labelData.fontSizes.price}px;">Rs ${labelData.price}</div>
       </div>
     `).join('');
 
-    // Generate barcode scripts for each label
     const barcodeScripts = Array(quantity).fill(null).map((_, i) => `
       JsBarcode("#barcode-${i}", "${labelData.barcodeValue}", {
         format: "CODE128",
@@ -143,7 +157,6 @@ const Index = () => {
             background: white;
           }
           .shop-name {
-            font-size: 10px;
             font-weight: bold;
             text-align: center;
             line-height: 1.2;
@@ -152,7 +165,6 @@ const Index = () => {
             white-space: nowrap;
           }
           .product-name {
-            font-size: 9px;
             text-align: center;
             line-height: 1.2;
             margin-top: 1px;
@@ -161,7 +173,6 @@ const Index = () => {
             white-space: nowrap;
           }
           .dates {
-            font-size: 7px;
             color: #333;
             display: flex;
             justify-content: space-between;
@@ -175,7 +186,6 @@ const Index = () => {
             margin-top: 2px;
           }
           .price {
-            font-size: 11px;
             font-weight: bold;
             text-align: center;
             line-height: 1;
@@ -244,8 +254,8 @@ const Index = () => {
               onReset={handleReset}
             />
 
-            {/* Save Template Button */}
-            <Dialog open={saveDialogOpen} onOpenChange={setSaveDialogOpen}>
+            {/* Save/Update Template Button */}
+            <Dialog open={saveDialogOpen} onOpenChange={handleDialogClose}>
               <DialogTrigger asChild>
                 <Button variant="outline" className="w-full">
                   <Save className="w-4 h-4 mr-2" />
@@ -254,9 +264,11 @@ const Index = () => {
               </DialogTrigger>
               <DialogContent>
                 <DialogHeader>
-                  <DialogTitle>Save Template</DialogTitle>
+                  <DialogTitle>{editingTemplate ? 'Update Template' : 'Save Template'}</DialogTitle>
                   <DialogDescription>
-                    Save your current label configuration for quick reuse later.
+                    {editingTemplate 
+                      ? 'Update this template with the current label configuration.'
+                      : 'Save your current label configuration for quick reuse later.'}
                   </DialogDescription>
                 </DialogHeader>
                 <div className="py-4">
@@ -271,11 +283,11 @@ const Index = () => {
                   />
                 </div>
                 <DialogFooter>
-                  <Button variant="outline" onClick={() => setSaveDialogOpen(false)}>
+                  <Button variant="outline" onClick={() => handleDialogClose(false)}>
                     Cancel
                   </Button>
                   <Button onClick={handleSaveTemplate} className="bg-accent text-accent-foreground hover:bg-accent/90">
-                    Save Template
+                    {editingTemplate ? 'Update Template' : 'Save Template'}
                   </Button>
                 </DialogFooter>
               </DialogContent>
@@ -286,6 +298,7 @@ const Index = () => {
               templates={templates}
               onLoad={handleLoadTemplate}
               onDelete={handleDeleteTemplate}
+              onEdit={handleEditTemplate}
             />
           </div>
 
@@ -404,7 +417,8 @@ const Index = () => {
               <h3 className="font-medium text-sm text-foreground mb-2">Quick Tips</h3>
               <ul className="text-sm text-muted-foreground space-y-1">
                 <li>• Save frequently used labels as templates</li>
-                <li>• Click any saved template to load it instantly</li>
+                <li>• Click the pencil icon to edit existing templates</li>
+                <li>• Adjust font sizes in the collapsible panel</li>
                 <li>• For best results, disable margins in print settings</li>
               </ul>
             </div>

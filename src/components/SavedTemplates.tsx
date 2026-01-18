@@ -3,7 +3,7 @@ import { LabelTemplate, LabelData, deleteTemplate } from '@/types/label';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Bookmark, Trash2, FileText, ChevronDown, ChevronUp } from 'lucide-react';
+import { Bookmark, Trash2, FileText, ChevronDown, ChevronUp, Pencil } from 'lucide-react';
 import { toast } from 'sonner';
 import {
   AlertDialog,
@@ -21,9 +21,10 @@ interface SavedTemplatesProps {
   templates: LabelTemplate[];
   onLoad: (data: LabelData) => void;
   onDelete: (id: string) => void;
+  onEdit: (template: LabelTemplate) => void;
 }
 
-const SavedTemplates = ({ templates, onLoad, onDelete }: SavedTemplatesProps) => {
+const SavedTemplates = ({ templates, onLoad, onDelete, onEdit }: SavedTemplatesProps) => {
   const [isExpanded, setIsExpanded] = useState(true);
 
   const handleLoad = (template: LabelTemplate) => {
@@ -91,41 +92,57 @@ const SavedTemplates = ({ templates, onLoad, onDelete }: SavedTemplatesProps) =>
                         {template.name}
                       </p>
                       <p className="text-xs text-muted-foreground truncate">
-                        {template.data.productName} • {template.data.currency}{template.data.price}
+                        {template.data.productName} • Rs {template.data.price}
                       </p>
                       <p className="text-xs text-muted-foreground mt-0.5">
-                        {formatDate(template.createdAt)}
+                        {formatDate(template.updatedAt || template.createdAt)}
+                        {template.updatedAt && template.updatedAt !== template.createdAt && ' (edited)'}
                       </p>
                     </button>
                     
-                    <AlertDialog>
-                      <AlertDialogTrigger asChild>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground hover:text-destructive"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </Button>
-                      </AlertDialogTrigger>
-                      <AlertDialogContent>
-                        <AlertDialogHeader>
-                          <AlertDialogTitle>Delete Template</AlertDialogTitle>
-                          <AlertDialogDescription>
-                            Are you sure you want to delete "{template.name}"? This action cannot be undone.
-                          </AlertDialogDescription>
-                        </AlertDialogHeader>
-                        <AlertDialogFooter>
-                          <AlertDialogCancel>Cancel</AlertDialogCancel>
-                          <AlertDialogAction
-                            onClick={() => handleDelete(template)}
-                            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                    <div className="flex items-center gap-1">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground hover:text-foreground"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onEdit(template);
+                        }}
+                        title="Edit template"
+                      >
+                        <Pencil className="w-4 h-4" />
+                      </Button>
+                      
+                      <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground hover:text-destructive"
                           >
-                            Delete
-                          </AlertDialogAction>
-                        </AlertDialogFooter>
-                      </AlertDialogContent>
-                    </AlertDialog>
+                            <Trash2 className="w-4 h-4" />
+                          </Button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent>
+                          <AlertDialogHeader>
+                            <AlertDialogTitle>Delete Template</AlertDialogTitle>
+                            <AlertDialogDescription>
+                              Are you sure you want to delete "{template.name}"? This action cannot be undone.
+                            </AlertDialogDescription>
+                          </AlertDialogHeader>
+                          <AlertDialogFooter>
+                            <AlertDialogCancel>Cancel</AlertDialogCancel>
+                            <AlertDialogAction
+                              onClick={() => handleDelete(template)}
+                              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                            >
+                              Delete
+                            </AlertDialogAction>
+                          </AlertDialogFooter>
+                        </AlertDialogContent>
+                      </AlertDialog>
+                    </div>
                   </div>
                 ))}
               </div>

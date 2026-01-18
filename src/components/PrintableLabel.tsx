@@ -10,7 +10,6 @@ interface PrintableLabelProps {
 
 const PrintableLabel = forwardRef<HTMLDivElement, PrintableLabelProps>(
   ({ data, size }, ref) => {
-    // For printing: 1mm = 3.78px at 96dpi
     const pxPerMm = 3.78;
     const widthPx = size.width * pxPerMm;
     const heightPx = size.height * pxPerMm;
@@ -37,7 +36,7 @@ const PrintableLabel = forwardRef<HTMLDivElement, PrintableLabelProps>(
         {/* Shop Name */}
         <div
           className="font-bold truncate text-center"
-          style={{ fontSize: '10px', lineHeight: 1.2 }}
+          style={{ fontSize: `${data.fontSizes.shopName}px`, lineHeight: 1.2 }}
         >
           {data.shopName}
         </div>
@@ -45,7 +44,7 @@ const PrintableLabel = forwardRef<HTMLDivElement, PrintableLabelProps>(
         {/* Product Name */}
         <div
           className="truncate text-center"
-          style={{ fontSize: '9px', lineHeight: 1.2, marginTop: '1px' }}
+          style={{ fontSize: `${data.fontSizes.productName}px`, lineHeight: 1.2, marginTop: '1px' }}
         >
           {data.productName}
         </div>
@@ -53,7 +52,7 @@ const PrintableLabel = forwardRef<HTMLDivElement, PrintableLabelProps>(
         {/* Dates */}
         <div
           className="flex justify-between"
-          style={{ fontSize: '7px', marginTop: '2px', color: '#333' }}
+          style={{ fontSize: `${data.fontSizes.dates}px`, marginTop: '2px', color: '#333' }}
         >
           <span>MFG: {formatDate(data.mfgDate)}</span>
           <span>EXP: {formatDate(data.expDate)}</span>
@@ -69,12 +68,12 @@ const PrintableLabel = forwardRef<HTMLDivElement, PrintableLabelProps>(
           />
         </div>
 
-        {/* Price */}
+        {/* Price - Always Rs */}
         <div
           className="font-bold text-center"
-          style={{ fontSize: '11px', lineHeight: 1 }}
+          style={{ fontSize: `${data.fontSizes.price}px`, lineHeight: 1 }}
         >
-          {data.currency} {data.price}
+          Rs {data.price}
         </div>
       </div>
     );

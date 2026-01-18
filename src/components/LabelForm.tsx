@@ -1,10 +1,14 @@
-import { LabelData, CURRENCIES, LabelSize, LABEL_SIZES } from '@/types/label';
+import { LabelData, LabelSize, LABEL_SIZES, DEFAULT_FONT_SIZES } from '@/types/label';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Shuffle, RotateCcw } from 'lucide-react';
+import { Slider } from '@/components/ui/slider';
+import { Shuffle, RotateCcw, Type } from 'lucide-react';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+import { useState } from 'react';
+import { ChevronDown, ChevronUp } from 'lucide-react';
 
 interface LabelFormProps {
   data: LabelData;
@@ -15,12 +19,27 @@ interface LabelFormProps {
 }
 
 const LabelForm = ({ data, onChange, selectedSize, onSizeChange, onReset }: LabelFormProps) => {
+  const [fontSizesOpen, setFontSizesOpen] = useState(false);
+
   const updateField = (field: keyof LabelData, value: string) => {
     onChange({ ...data, [field]: value });
   };
 
+  const updateFontSize = (field: keyof typeof data.fontSizes, value: number) => {
+    onChange({
+      ...data,
+      fontSizes: { ...data.fontSizes, [field]: value },
+    });
+  };
+
+  const resetFontSizes = () => {
+    onChange({
+      ...data,
+      fontSizes: { ...DEFAULT_FONT_SIZES },
+    });
+  };
+
   const generateBarcode = () => {
-    // Generate a random barcode: prefix + timestamp + random
     const prefix = data.productName.substring(0, 2).toUpperCase() || 'PR';
     const timestamp = Date.now().toString().slice(-6);
     const random = Math.floor(Math.random() * 100).toString().padStart(2, '0');
@@ -108,35 +127,18 @@ const LabelForm = ({ data, onChange, selectedSize, onSizeChange, onReset }: Labe
           </div>
         </div>
 
-        {/* Price Row */}
-        <div className="grid grid-cols-3 gap-3">
-          <div className="space-y-2">
-            <Label htmlFor="currency">Currency</Label>
-            <Select value={data.currency} onValueChange={(value) => updateField('currency', value)}>
-              <SelectTrigger id="currency">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {CURRENCIES.map((curr) => (
-                  <SelectItem key={curr.symbol} value={curr.symbol}>
-                    {curr.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-          <div className="space-y-2 col-span-2">
-            <Label htmlFor="price">Price</Label>
-            <Input
-              id="price"
-              type="number"
-              value={data.price}
-              onChange={(e) => updateField('price', e.target.value)}
-              placeholder="0.00"
-              min="0"
-              step="0.01"
-            />
-          </div>
+        {/* Price - Currency fixed to Rs */}
+        <div className="space-y-2">
+          <Label htmlFor="price">Price (Rs)</Label>
+          <Input
+            id="price"
+            type="number"
+            value={data.price}
+            onChange={(e) => updateField('price', e.target.value)}
+            placeholder="0.00"
+            min="0"
+            step="0.01"
+          />
         </div>
 
         {/* Barcode */}
@@ -165,6 +167,91 @@ const LabelForm = ({ data, onChange, selectedSize, onSizeChange, onReset }: Labe
             Auto-generate or enter manually. Max 20 characters.
           </p>
         </div>
+
+        {/* Font Size Controls */}
+        <Collapsible open={fontSizesOpen} onOpenChange={setFontSizesOpen}>
+          <CollapsibleTrigger asChild>
+            <Button variant="outline" className="w-full justify-between">
+              <div className="flex items-center gap-2">
+                <Type className="w-4 h-4" />
+                <span>Font Sizes</span>
+              </div>
+              {fontSizesOpen ? (
+                <ChevronUp className="w-4 h-4" />
+              ) : (
+                <ChevronDown className="w-4 h-4" />
+              )}
+            </Button>
+          </CollapsibleTrigger>
+          <CollapsibleContent className="pt-4 space-y-4">
+            <div className="space-y-3">
+              <div className="space-y-2">
+                <div className="flex justify-between text-sm">
+                  <Label>Shop Name</Label>
+                  <span className="text-muted-foreground">{data.fontSizes.shopName}px</span>
+                </div>
+                <Slider
+                  value={[data.fontSizes.shopName]}
+                  onValueChange={([value]) => updateFontSize('shopName', value)}
+                  min={6}
+                  max={16}
+                  step={1}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <div className="flex justify-between text-sm">
+                  <Label>Product Name</Label>
+                  <span className="text-muted-foreground">{data.fontSizes.productName}px</span>
+                </div>
+                <Slider
+                  value={[data.fontSizes.productName]}
+                  onValueChange={([value]) => updateFontSize('productName', value)}
+                  min={6}
+                  max={14}
+                  step={1}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <div className="flex justify-between text-sm">
+                  <Label>Dates</Label>
+                  <span className="text-muted-foreground">{data.fontSizes.dates}px</span>
+                </div>
+                <Slider
+                  value={[data.fontSizes.dates]}
+                  onValueChange={([value]) => updateFontSize('dates', value)}
+                  min={5}
+                  max={10}
+                  step={1}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <div className="flex justify-between text-sm">
+                  <Label>Price</Label>
+                  <span className="text-muted-foreground">{data.fontSizes.price}px</span>
+                </div>
+                <Slider
+                  value={[data.fontSizes.price]}
+                  onValueChange={([value]) => updateFontSize('price', value)}
+                  min={8}
+                  max={16}
+                  step={1}
+                />
+              </div>
+
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={resetFontSizes}
+                className="w-full text-muted-foreground"
+              >
+                Reset to Default Sizes
+              </Button>
+            </div>
+          </CollapsibleContent>
+        </Collapsible>
       </CardContent>
     </Card>
   );
