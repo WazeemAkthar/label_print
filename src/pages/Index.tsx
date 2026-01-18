@@ -117,7 +117,7 @@ const Index = () => {
         <div class="barcode-container">
           <svg id="barcode-${i}"></svg>
         </div>
-        <div class="price" style="font-size: ${labelData.fontSizes.price}px;">Rs ${labelData.price}</div>
+        <div class="price" style="font-size: ${labelData.fontSizes.price}px;">Rs ${labelData.price}/=</div>
       </div>
     `).join('');
 

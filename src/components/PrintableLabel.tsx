@@ -68,12 +68,12 @@ const PrintableLabel = forwardRef<HTMLDivElement, PrintableLabelProps>(
           />
         </div>
 
-        {/* Price - Always Rs */}
+        {/* Price - Always Rs with /= */}
         <div
           className="font-bold text-center"
           style={{ fontSize: `${data.fontSizes.price}px`, lineHeight: 1 }}
         >
-          Rs {data.price}
+          Rs {data.price}/=
         </div>
       </div>
     );

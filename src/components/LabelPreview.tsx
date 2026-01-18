@@ -71,12 +71,12 @@ const LabelPreview = forwardRef<HTMLDivElement, LabelPreviewProps>(
           />
         </div>
 
-        {/* Price - Always Rs */}
+        {/* Price - Always Rs with /= */}
         <div
           className="font-bold text-foreground text-center"
           style={{ fontSize: `${data.fontSizes.price * fontScale}px`, lineHeight: 1 }}
         >
-          Rs {data.price || '0'}
+          Rs {data.price || '0'}/=
         </div>
       </div>
     );
