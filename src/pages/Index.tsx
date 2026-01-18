@@ -103,31 +103,50 @@ const Index = () => {
     }
 
     const pxPerMm = 3.78;
+    const columns = selectedSize.columns || 1;
     const widthPx = selectedSize.width * pxPerMm;
     const heightPx = selectedSize.height * pxPerMm;
+    const totalPageWidth = widthPx * columns;
 
-    const labelsHtml = Array(quantity).fill(null).map((_, i) => `
-      <div class="label" ${i > 0 ? 'style="page-break-before: always;"' : ''}>
-        <div class="shop-name" style="font-size: ${labelData.fontSizes.shopName}px;">${labelData.shopName}</div>
-        <div class="product-name" style="font-size: ${labelData.fontSizes.productName}px;">${labelData.productName}</div>
-        <div class="price" style="font-size: ${labelData.fontSizes.price}px;">Rs. ${labelData.price}/=</div>
-        <div class="dates" style="font-size: ${labelData.fontSizes.dates}px;">
-          <div>MFG: ${formatDateForPrint(labelData.mfgDate)}</div>
-          <div>EXP: ${formatDateForPrint(labelData.expDate)}</div>
-        </div>
-        <div class="barcode-container">
-          <svg id="barcode-${i}"></svg>
-        </div>
-      </div>
-    `).join('');
+    // Group labels into rows based on columns
+    const labelsPerRow = columns;
+    const totalRows = Math.ceil(quantity / labelsPerRow);
+    
+    let labelsHtml = '';
+    let barcodeIndex = 0;
+    
+    for (let row = 0; row < totalRows; row++) {
+      const isNewPage = row > 0;
+      labelsHtml += `<div class="label-row" ${isNewPage ? 'style="page-break-before: always;"' : ''}>`;
+      
+      for (let col = 0; col < labelsPerRow && barcodeIndex < quantity; col++) {
+        labelsHtml += `
+          <div class="label">
+            <div class="shop-name" style="font-size: ${labelData.fontSizes.shopName}px;">${labelData.shopName}</div>
+            <div class="product-name" style="font-size: ${labelData.fontSizes.productName}px;">${labelData.productName}</div>
+            <div class="price" style="font-size: ${labelData.fontSizes.price}px;">Rs. ${labelData.price}/=</div>
+            <div class="dates" style="font-size: ${labelData.fontSizes.dates}px;">
+              <div>MFG: ${formatDateForPrint(labelData.mfgDate)}</div>
+              <div>EXP: ${formatDateForPrint(labelData.expDate)}</div>
+            </div>
+            <div class="barcode-container">
+              <svg id="barcode-${barcodeIndex}"></svg>
+            </div>
+          </div>
+        `;
+        barcodeIndex++;
+      }
+      
+      labelsHtml += '</div>';
+    }
 
     const barcodeScripts = Array(quantity).fill(null).map((_, i) => `
       JsBarcode("#barcode-${i}", "${labelData.barcodeValue}", {
         format: "CODE128",
-        width: 2,
-        height: 28,
+        width: ${columns > 1 ? 1.5 : 2},
+        height: ${columns > 2 ? 22 : 28},
         displayValue: true,
-        fontSize: 8,
+        fontSize: ${columns > 2 ? 6 : 8},
         margin: 0
       });
     `).join('');
@@ -140,13 +159,18 @@ const Index = () => {
         <style>
           @page {
             margin: 0;
-            size: ${selectedSize.width}mm ${selectedSize.height}mm;
+            size: ${selectedSize.width * columns}mm ${selectedSize.height}mm;
           }
           * { margin: 0; padding: 0; box-sizing: border-box; }
           body { 
             font-family: Arial, sans-serif;
             -webkit-print-color-adjust: exact;
             print-color-adjust: exact;
+          }
+          .label-row {
+            display: flex;
+            flex-direction: row;
+            width: ${totalPageWidth}px;
           }
           .label {
             width: ${widthPx}px;
@@ -156,6 +180,7 @@ const Index = () => {
             flex-direction: column;
             overflow: hidden;
             background: white;
+            flex-shrink: 0;
           }
           .shop-name {
             font-weight: bold;
@@ -205,7 +230,7 @@ const Index = () => {
       </html>
     `);
     printWindow.document.close();
-    toast.success(`Print dialog opened for ${quantity} label${quantity > 1 ? 's' : ''}`);
+    toast.success(`Print dialog opened for ${quantity} label${quantity > 1 ? 's' : ''} (${columns} column${columns > 1 ? 's' : ''})`);
   };
 
   const formatDateForPrint = (dateStr: string) => {

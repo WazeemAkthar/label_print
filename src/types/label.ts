@@ -27,14 +27,15 @@ export interface LabelSize {
   width: number;
   height: number;
   name: string;
+  columns?: number;
   isCustom?: boolean;
 }
 
 export const DEFAULT_LABEL_SIZES: LabelSize[] = [
-  { width: 38, height: 25, name: '38mm × 25mm (Standard)' },
-  { width: 38, height: 50, name: '38mm × 25mm (2 Lines)' },
-  { width: 50, height: 25, name: '50mm × 25mm (Wide)' },
-  { width: 38, height: 38, name: '38mm × 38mm (Square)' },
+  { width: 38, height: 25, name: '38mm × 25mm (Standard)', columns: 1 },
+  { width: 38, height: 50, name: '38mm × 25mm (2 Lines)', columns: 1 },
+  { width: 50, height: 25, name: '50mm × 25mm (Wide)', columns: 1 },
+  { width: 38, height: 38, name: '38mm × 38mm (Square)', columns: 1 },
 ];
 
 const CUSTOM_SIZES_STORAGE_KEY = 'labelmaker-custom-sizes';
