@@ -31,6 +31,8 @@ export interface LabelSize {
 
 export const LABEL_SIZES: LabelSize[] = [
   { width: 38, height: 25, name: '38mm × 25mm (Standard)' },
+  { width: 50, height: 25, name: '50mm × 25mm (Wide)' },
+  { width: 38, height: 38, name: '38mm × 38mm (Square)' },
 ];
 
 export const DEFAULT_FONT_SIZES: FontSizes = {
