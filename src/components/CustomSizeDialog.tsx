@@ -56,6 +56,7 @@ const CustomSizeDialog = ({ onSizeAdded }: CustomSizeDialogProps) => {
       width: w,
       height: h,
       name: `${w}mm × ${h}mm${columnText} (Custom)`,
+      columns: cols,
       isCustom: true,
     };
 
