@@ -5,18 +5,26 @@ import LabelPreview from '@/components/LabelPreview';
 import PrintableLabel from '@/components/PrintableLabel';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Printer, Download, Tag, ZoomIn, ZoomOut } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Printer, Download, Tag, ZoomIn, ZoomOut, Minus, Plus, Copy } from 'lucide-react';
 import { toast } from 'sonner';
 
 const Index = () => {
   const [labelData, setLabelData] = useState<LabelData>(DEFAULT_LABEL_DATA);
   const [selectedSize, setSelectedSize] = useState<LabelSize>(LABEL_SIZES[0]);
   const [previewScale, setPreviewScale] = useState(4);
+  const [quantity, setQuantity] = useState(1);
   const printRef = useRef<HTMLDivElement>(null);
 
   const handleReset = () => {
     setLabelData(DEFAULT_LABEL_DATA);
+    setQuantity(1);
     toast.success('Label reset to defaults');
+  };
+
+  const handleQuantityChange = (newQty: number) => {
+    setQuantity(Math.max(1, Math.min(100, newQty)));
   };
 
   const handlePrint = () => {
@@ -36,11 +44,38 @@ const Index = () => {
     const widthPx = selectedSize.width * pxPerMm;
     const heightPx = selectedSize.height * pxPerMm;
 
+    // Generate multiple labels
+    const labelsHtml = Array(quantity).fill(null).map((_, i) => `
+      <div class="label" ${i > 0 ? 'style="page-break-before: always;"' : ''}>
+        <div class="shop-name">${labelData.shopName}</div>
+        <div class="product-name">${labelData.productName}</div>
+        <div class="dates">
+          <span>MFG: ${formatDateForPrint(labelData.mfgDate)}</span>
+          <span>EXP: ${formatDateForPrint(labelData.expDate)}</span>
+        </div>
+        <div class="barcode-container">
+          <svg id="barcode-${i}"></svg>
+        </div>
+        <div class="price">${labelData.currency} ${labelData.price}</div>
+      </div>
+    `).join('');
+
+    // Generate barcode scripts for each label
+    const barcodeScripts = Array(quantity).fill(null).map((_, i) => `
+      JsBarcode("#barcode-${i}", "${labelData.barcodeValue}", {
+        format: "CODE128",
+        width: 1,
+        height: 20,
+        displayValue: false,
+        margin: 0
+      });
+    `).join('');
+
     printWindow.document.write(`
       <!DOCTYPE html>
       <html>
       <head>
-        <title>Print Label</title>
+        <title>Print ${quantity} Label${quantity > 1 ? 's' : ''}</title>
         <style>
           @page {
             margin: 0;
@@ -103,33 +138,16 @@ const Index = () => {
         <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"><\/script>
       </head>
       <body>
-        <div class="label">
-          <div class="shop-name">${labelData.shopName}</div>
-          <div class="product-name">${labelData.productName}</div>
-          <div class="dates">
-            <span>MFG: ${formatDateForPrint(labelData.mfgDate)}</span>
-            <span>EXP: ${formatDateForPrint(labelData.expDate)}</span>
-          </div>
-          <div class="barcode-container">
-            <svg id="barcode"></svg>
-          </div>
-          <div class="price">${labelData.currency} ${labelData.price}</div>
-        </div>
+        ${labelsHtml}
         <script>
-          JsBarcode("#barcode", "${labelData.barcodeValue}", {
-            format: "CODE128",
-            width: 1,
-            height: 20,
-            displayValue: false,
-            margin: 0
-          });
+          ${barcodeScripts}
           setTimeout(() => window.print(), 200);
         <\/script>
       </body>
       </html>
     `);
     printWindow.document.close();
-    toast.success('Print dialog opened');
+    toast.success(`Print dialog opened for ${quantity} label${quantity > 1 ? 's' : ''}`);
   };
 
   const formatDateForPrint = (dateStr: string) => {
@@ -146,7 +164,6 @@ const Index = () => {
       toast.error('Please enter or generate a barcode value');
       return;
     }
-    // For MVP, we use print to PDF functionality
     toast.info('Use "Save as PDF" in the print dialog to download');
     handlePrint();
   };
@@ -226,6 +243,49 @@ const Index = () => {
               </CardContent>
             </Card>
 
+            {/* Quantity Selector */}
+            <Card>
+              <CardContent className="pt-4">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <Copy className="w-4 h-4 text-muted-foreground" />
+                    <Label className="text-sm font-medium">Print Quantity</Label>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      className="h-8 w-8"
+                      onClick={() => handleQuantityChange(quantity - 1)}
+                      disabled={quantity <= 1}
+                    >
+                      <Minus className="w-4 h-4" />
+                    </Button>
+                    <Input
+                      type="number"
+                      value={quantity}
+                      onChange={(e) => handleQuantityChange(parseInt(e.target.value) || 1)}
+                      className="w-16 h-8 text-center font-medium"
+                      min={1}
+                      max={100}
+                    />
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      className="h-8 w-8"
+                      onClick={() => handleQuantityChange(quantity + 1)}
+                      disabled={quantity >= 100}
+                    >
+                      <Plus className="w-4 h-4" />
+                    </Button>
+                  </div>
+                </div>
+                <p className="text-xs text-muted-foreground mt-2">
+                  {quantity > 1 ? `Will print ${quantity} identical labels` : 'Print a single label'}
+                </p>
+              </CardContent>
+            </Card>
+
             {/* Action Buttons */}
             <div className="grid grid-cols-2 gap-3">
               <Button
@@ -234,7 +294,7 @@ const Index = () => {
                 disabled={!labelData.barcodeValue}
               >
                 <Printer className="w-5 h-5 mr-2" />
-                Print Label
+                Print {quantity > 1 ? `${quantity} Labels` : 'Label'}
               </Button>
               <Button
                 onClick={handleDownloadPDF}
@@ -252,7 +312,7 @@ const Index = () => {
               <h3 className="font-medium text-sm text-foreground mb-2">Quick Tips</h3>
               <ul className="text-sm text-muted-foreground space-y-1">
                 <li>• Click the shuffle icon to auto-generate a unique barcode</li>
-                <li>• Use "Save as PDF" in print dialog for digital copies</li>
+                <li>• Set quantity to print multiple copies at once</li>
                 <li>• For best results, disable margins in print settings</li>
               </ul>
             </div>
