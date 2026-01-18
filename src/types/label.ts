@@ -1,11 +1,18 @@
+export interface FontSizes {
+  shopName: number;
+  productName: number;
+  dates: number;
+  price: number;
+}
+
 export interface LabelData {
   shopName: string;
   productName: string;
   mfgDate: string;
   expDate: string;
   price: string;
-  currency: string;
   barcodeValue: string;
+  fontSizes: FontSizes;
 }
 
 export interface LabelTemplate {
@@ -13,6 +20,7 @@ export interface LabelTemplate {
   name: string;
   data: LabelData;
   createdAt: number;
+  updatedAt?: number;
 }
 
 export interface LabelSize {
@@ -25,13 +33,12 @@ export const LABEL_SIZES: LabelSize[] = [
   { width: 38, height: 25, name: '38mm × 25mm (Standard)' },
 ];
 
-export const CURRENCIES = [
-  { symbol: '₹', name: 'INR (₹)' },
-  { symbol: 'Rs', name: 'Rs' },
-  { symbol: '$', name: 'USD ($)' },
-  { symbol: '€', name: 'EUR (€)' },
-  { symbol: '£', name: 'GBP (£)' },
-];
+export const DEFAULT_FONT_SIZES: FontSizes = {
+  shopName: 10,
+  productName: 9,
+  dates: 7,
+  price: 11,
+};
 
 export const DEFAULT_LABEL_DATA: LabelData = {
   shopName: 'My Shop',
@@ -39,8 +46,8 @@ export const DEFAULT_LABEL_DATA: LabelData = {
   mfgDate: new Date().toISOString().split('T')[0],
   expDate: new Date(Date.now() + 180 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
   price: '450',
-  currency: '₹',
   barcodeValue: '',
+  fontSizes: { ...DEFAULT_FONT_SIZES },
 };
 
 const TEMPLATES_STORAGE_KEY = 'labelmaker-templates';
@@ -49,7 +56,7 @@ export const saveTemplate = (template: LabelTemplate): void => {
   const templates = getTemplates();
   const existingIndex = templates.findIndex(t => t.id === template.id);
   if (existingIndex >= 0) {
-    templates[existingIndex] = template;
+    templates[existingIndex] = { ...template, updatedAt: Date.now() };
   } else {
     templates.unshift(template);
   }
@@ -59,7 +66,15 @@ export const saveTemplate = (template: LabelTemplate): void => {
 export const getTemplates = (): LabelTemplate[] => {
   try {
     const stored = localStorage.getItem(TEMPLATES_STORAGE_KEY);
-    return stored ? JSON.parse(stored) : [];
+    const templates = stored ? JSON.parse(stored) : [];
+    // Migrate old templates without fontSizes
+    return templates.map((t: LabelTemplate) => ({
+      ...t,
+      data: {
+        ...t.data,
+        fontSizes: t.data.fontSizes || { ...DEFAULT_FONT_SIZES },
+      },
+    }));
   } catch {
     return [];
   }

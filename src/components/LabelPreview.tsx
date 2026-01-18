@@ -11,7 +11,6 @@ interface LabelPreviewProps {
 
 const LabelPreview = forwardRef<HTMLDivElement, LabelPreviewProps>(
   ({ data, size, scale = 3 }, ref) => {
-    // Convert mm to pixels (1mm ≈ 3.78px at 96dpi, we use scale for display)
     const pxPerMm = 3.78 * scale;
     const widthPx = size.width * pxPerMm;
     const heightPx = size.height * pxPerMm;
@@ -23,6 +22,9 @@ const LabelPreview = forwardRef<HTMLDivElement, LabelPreviewProps>(
         return dateStr;
       }
     };
+
+    // Scale font sizes based on preview scale
+    const fontScale = scale / 3;
 
     return (
       <div
@@ -37,7 +39,7 @@ const LabelPreview = forwardRef<HTMLDivElement, LabelPreviewProps>(
         {/* Shop Name */}
         <div
           className="font-semibold text-foreground truncate text-center"
-          style={{ fontSize: `${3.5 * scale}px`, lineHeight: 1.2 }}
+          style={{ fontSize: `${data.fontSizes.shopName * fontScale}px`, lineHeight: 1.2 }}
         >
           {data.shopName || 'Shop Name'}
         </div>
@@ -45,7 +47,7 @@ const LabelPreview = forwardRef<HTMLDivElement, LabelPreviewProps>(
         {/* Product Name */}
         <div
           className="text-foreground truncate text-center"
-          style={{ fontSize: `${3 * scale}px`, lineHeight: 1.2, marginTop: `${0.5 * scale}px` }}
+          style={{ fontSize: `${data.fontSizes.productName * fontScale}px`, lineHeight: 1.2, marginTop: `${0.5 * scale}px` }}
         >
           {data.productName || 'Product'}
         </div>
@@ -53,13 +55,13 @@ const LabelPreview = forwardRef<HTMLDivElement, LabelPreviewProps>(
         {/* Dates */}
         <div
           className="flex justify-between text-muted-foreground"
-          style={{ fontSize: `${2.2 * scale}px`, marginTop: `${1 * scale}px` }}
+          style={{ fontSize: `${data.fontSizes.dates * fontScale}px`, marginTop: `${1 * scale}px` }}
         >
           <span>MFG: {formatDate(data.mfgDate)}</span>
           <span>EXP: {formatDate(data.expDate)}</span>
         </div>
 
-        {/* Barcode - centered and takes remaining space */}
+        {/* Barcode */}
         <div className="flex-1 flex items-center justify-center" style={{ marginTop: `${1 * scale}px` }}>
           <Barcode
             value={data.barcodeValue}
@@ -69,12 +71,12 @@ const LabelPreview = forwardRef<HTMLDivElement, LabelPreviewProps>(
           />
         </div>
 
-        {/* Price */}
+        {/* Price - Always Rs */}
         <div
           className="font-bold text-foreground text-center"
-          style={{ fontSize: `${4 * scale}px`, lineHeight: 1 }}
+          style={{ fontSize: `${data.fontSizes.price * fontScale}px`, lineHeight: 1 }}
         >
-          {data.currency} {data.price || '0'}
+          Rs {data.price || '0'}
         </div>
       </div>
     );
