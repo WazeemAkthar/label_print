@@ -110,6 +110,7 @@ const Index = () => {
       <div class="label" ${i > 0 ? 'style="page-break-before: always;"' : ''}>
         <div class="shop-name" style="font-size: ${labelData.fontSizes.shopName}px;">${labelData.shopName}</div>
         <div class="product-name" style="font-size: ${labelData.fontSizes.productName}px;">${labelData.productName}</div>
+        <div class="price" style="font-size: ${labelData.fontSizes.price}px;">Rs. ${labelData.price}/=</div>
         <div class="dates" style="font-size: ${labelData.fontSizes.dates}px;">
           <div>MFG: ${formatDateForPrint(labelData.mfgDate)}</div>
           <div>EXP: ${formatDateForPrint(labelData.expDate)}</div>
@@ -117,7 +118,6 @@ const Index = () => {
         <div class="barcode-container">
           <svg id="barcode-${i}"></svg>
         </div>
-        <div class="price" style="font-size: ${labelData.fontSizes.price}px;">Rs. ${labelData.price}/=</div>
       </div>
     `).join('');
 
@@ -125,8 +125,9 @@ const Index = () => {
       JsBarcode("#barcode-${i}", "${labelData.barcodeValue}", {
         format: "CODE128",
         width: 2,
-        height: 20,
-        displayValue: false,
+        height: 28,
+        displayValue: true,
+        fontSize: 8,
         margin: 0
       });
     `).join('');
@@ -172,10 +173,16 @@ const Index = () => {
             text-overflow: ellipsis;
             white-space: nowrap;
           }
+          .price {
+            font-weight: bold;
+            text-align: center;
+            line-height: 1;
+            margin-top: 1px;
+          }
           .dates {
             color: #333;
             text-align: center;
-            margin-top: 2px;
+            margin-top: 1px;
             line-height: 1.3;
           }
           .barcode-container {
@@ -183,12 +190,7 @@ const Index = () => {
             display: flex;
             align-items: center;
             justify-content: center;
-            margin-top: 2px;
-          }
-          .price {
-            font-weight: bold;
-            text-align: center;
-            line-height: 1;
+            margin-top: 1px;
           }
         </style>
         <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"><\/script>
