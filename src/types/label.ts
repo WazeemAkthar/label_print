@@ -8,6 +8,13 @@ export interface LabelData {
   barcodeValue: string;
 }
 
+export interface LabelTemplate {
+  id: string;
+  name: string;
+  data: LabelData;
+  createdAt: number;
+}
+
 export interface LabelSize {
   width: number;
   height: number;
@@ -34,4 +41,35 @@ export const DEFAULT_LABEL_DATA: LabelData = {
   price: '450',
   currency: '₹',
   barcodeValue: '',
+};
+
+const TEMPLATES_STORAGE_KEY = 'labelmaker-templates';
+
+export const saveTemplate = (template: LabelTemplate): void => {
+  const templates = getTemplates();
+  const existingIndex = templates.findIndex(t => t.id === template.id);
+  if (existingIndex >= 0) {
+    templates[existingIndex] = template;
+  } else {
+    templates.unshift(template);
+  }
+  localStorage.setItem(TEMPLATES_STORAGE_KEY, JSON.stringify(templates));
+};
+
+export const getTemplates = (): LabelTemplate[] => {
+  try {
+    const stored = localStorage.getItem(TEMPLATES_STORAGE_KEY);
+    return stored ? JSON.parse(stored) : [];
+  } catch {
+    return [];
+  }
+};
+
+export const deleteTemplate = (id: string): void => {
+  const templates = getTemplates().filter(t => t.id !== id);
+  localStorage.setItem(TEMPLATES_STORAGE_KEY, JSON.stringify(templates));
+};
+
+export const generateTemplateId = (): string => {
+  return `tpl_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
 };

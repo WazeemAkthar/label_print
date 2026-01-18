@@ -1,21 +1,39 @@
-import { useState, useRef } from 'react';
-import { LabelData, LabelSize, LABEL_SIZES, DEFAULT_LABEL_DATA } from '@/types/label';
+import { useState, useRef, useEffect } from 'react';
+import { LabelData, LabelSize, LABEL_SIZES, DEFAULT_LABEL_DATA, LabelTemplate, getTemplates, saveTemplate, generateTemplateId } from '@/types/label';
 import LabelForm from '@/components/LabelForm';
 import LabelPreview from '@/components/LabelPreview';
 import PrintableLabel from '@/components/PrintableLabel';
+import SavedTemplates from '@/components/SavedTemplates';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Printer, Download, Tag, ZoomIn, ZoomOut, Minus, Plus, Copy } from 'lucide-react';
+import { Printer, Download, Tag, ZoomIn, ZoomOut, Minus, Plus, Copy, Save } from 'lucide-react';
 import { toast } from 'sonner';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog';
 
 const Index = () => {
   const [labelData, setLabelData] = useState<LabelData>(DEFAULT_LABEL_DATA);
   const [selectedSize, setSelectedSize] = useState<LabelSize>(LABEL_SIZES[0]);
   const [previewScale, setPreviewScale] = useState(4);
   const [quantity, setQuantity] = useState(1);
+  const [templates, setTemplates] = useState<LabelTemplate[]>([]);
+  const [templateName, setTemplateName] = useState('');
+  const [saveDialogOpen, setSaveDialogOpen] = useState(false);
   const printRef = useRef<HTMLDivElement>(null);
+
+  // Load templates on mount
+  useEffect(() => {
+    setTemplates(getTemplates());
+  }, []);
 
   const handleReset = () => {
     setLabelData(DEFAULT_LABEL_DATA);
@@ -25,6 +43,34 @@ const Index = () => {
 
   const handleQuantityChange = (newQty: number) => {
     setQuantity(Math.max(1, Math.min(100, newQty)));
+  };
+
+  const handleSaveTemplate = () => {
+    if (!templateName.trim()) {
+      toast.error('Please enter a template name');
+      return;
+    }
+
+    const template: LabelTemplate = {
+      id: generateTemplateId(),
+      name: templateName.trim(),
+      data: { ...labelData },
+      createdAt: Date.now(),
+    };
+
+    saveTemplate(template);
+    setTemplates(getTemplates());
+    setTemplateName('');
+    setSaveDialogOpen(false);
+    toast.success(`Template "${template.name}" saved`);
+  };
+
+  const handleLoadTemplate = (data: LabelData) => {
+    setLabelData(data);
+  };
+
+  const handleDeleteTemplate = (id: string) => {
+    setTemplates(templates.filter(t => t.id !== id));
   };
 
   const handlePrint = () => {
@@ -188,14 +234,60 @@ const Index = () => {
       {/* Main Content */}
       <main className="container mx-auto px-4 py-6 no-print">
         <div className="grid lg:grid-cols-2 gap-6">
-          {/* Left: Form */}
-          <LabelForm
-            data={labelData}
-            onChange={setLabelData}
-            selectedSize={selectedSize}
-            onSizeChange={setSelectedSize}
-            onReset={handleReset}
-          />
+          {/* Left: Form + Templates */}
+          <div className="space-y-4">
+            <LabelForm
+              data={labelData}
+              onChange={setLabelData}
+              selectedSize={selectedSize}
+              onSizeChange={setSelectedSize}
+              onReset={handleReset}
+            />
+
+            {/* Save Template Button */}
+            <Dialog open={saveDialogOpen} onOpenChange={setSaveDialogOpen}>
+              <DialogTrigger asChild>
+                <Button variant="outline" className="w-full">
+                  <Save className="w-4 h-4 mr-2" />
+                  Save as Template
+                </Button>
+              </DialogTrigger>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>Save Template</DialogTitle>
+                  <DialogDescription>
+                    Save your current label configuration for quick reuse later.
+                  </DialogDescription>
+                </DialogHeader>
+                <div className="py-4">
+                  <Label htmlFor="templateName">Template Name</Label>
+                  <Input
+                    id="templateName"
+                    value={templateName}
+                    onChange={(e) => setTemplateName(e.target.value)}
+                    placeholder="e.g., Milk Powder Label"
+                    className="mt-2"
+                    onKeyDown={(e) => e.key === 'Enter' && handleSaveTemplate()}
+                  />
+                </div>
+                <DialogFooter>
+                  <Button variant="outline" onClick={() => setSaveDialogOpen(false)}>
+                    Cancel
+                  </Button>
+                  <Button onClick={handleSaveTemplate} className="bg-accent text-accent-foreground hover:bg-accent/90">
+                    Save Template
+                  </Button>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
+
+            {/* Saved Templates */}
+            <SavedTemplates
+              templates={templates}
+              onLoad={handleLoadTemplate}
+              onDelete={handleDeleteTemplate}
+            />
+          </div>
 
           {/* Right: Preview & Actions */}
           <div className="space-y-4">
@@ -311,8 +403,8 @@ const Index = () => {
             <div className="p-4 bg-muted rounded-lg">
               <h3 className="font-medium text-sm text-foreground mb-2">Quick Tips</h3>
               <ul className="text-sm text-muted-foreground space-y-1">
-                <li>• Click the shuffle icon to auto-generate a unique barcode</li>
-                <li>• Set quantity to print multiple copies at once</li>
+                <li>• Save frequently used labels as templates</li>
+                <li>• Click any saved template to load it instantly</li>
                 <li>• For best results, disable margins in print settings</li>
               </ul>
             </div>
