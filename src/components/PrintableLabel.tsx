@@ -49,31 +49,32 @@ const PrintableLabel = forwardRef<HTMLDivElement, PrintableLabelProps>(
           {data.productName}
         </div>
 
+        {/* Price - Rs. with /= */}
+        <div
+          className="font-bold text-center"
+          style={{ fontSize: `${data.fontSizes.price}px`, lineHeight: 1, marginTop: '1px' }}
+        >
+          Rs. {data.price}/=
+        </div>
+
         {/* Dates - Stacked */}
         <div
           className="text-center"
-          style={{ fontSize: `${data.fontSizes.dates}px`, marginTop: '2px', color: '#333', lineHeight: 1.3 }}
+          style={{ fontSize: `${data.fontSizes.dates}px`, marginTop: '1px', color: '#333', lineHeight: 1.3 }}
         >
           <div>MFG: {formatDate(data.mfgDate)}</div>
           <div>EXP: {formatDate(data.expDate)}</div>
         </div>
 
-        {/* Barcode - Full Width */}
-        <div className="flex-1 flex items-center justify-center w-full" style={{ marginTop: '2px' }}>
+        {/* Barcode - Full Width with Value */}
+        <div className="flex-1 flex items-center justify-center w-full" style={{ marginTop: '1px' }}>
           <Barcode
             value={data.barcodeValue}
             width={2}
-            height={20}
-            displayValue={false}
+            height={28}
+            displayValue={true}
+            fontSize={8}
           />
-        </div>
-
-        {/* Price - Rs. with /= */}
-        <div
-          className="font-bold text-center"
-          style={{ fontSize: `${data.fontSizes.price}px`, lineHeight: 1 }}
-        >
-          Rs. {data.price}/=
         </div>
       </div>
     );
