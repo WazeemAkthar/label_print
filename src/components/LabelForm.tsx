@@ -1,4 +1,4 @@
-import { LabelData, LabelSize, LABEL_SIZES, DEFAULT_FONT_SIZES } from '@/types/label';
+import { LabelData, LabelSize, getAllLabelSizes, DEFAULT_FONT_SIZES } from '@/types/label';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -7,8 +7,9 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Slider } from '@/components/ui/slider';
 import { Shuffle, RotateCcw, Type } from 'lucide-react';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { ChevronDown, ChevronUp } from 'lucide-react';
+import CustomSizeDialog from './CustomSizeDialog';
 
 interface LabelFormProps {
   data: LabelData;
@@ -20,6 +21,11 @@ interface LabelFormProps {
 
 const LabelForm = ({ data, onChange, selectedSize, onSizeChange, onReset }: LabelFormProps) => {
   const [fontSizesOpen, setFontSizesOpen] = useState(false);
+  const [labelSizes, setLabelSizes] = useState<LabelSize[]>(getAllLabelSizes());
+
+  const refreshSizes = () => {
+    setLabelSizes(getAllLabelSizes());
+  };
 
   const updateField = (field: keyof LabelData, value: string) => {
     onChange({ ...data, [field]: value });
@@ -60,11 +66,14 @@ const LabelForm = ({ data, onChange, selectedSize, onSizeChange, onReset }: Labe
       <CardContent className="space-y-4">
         {/* Label Size */}
         <div className="space-y-2">
-          <Label htmlFor="labelSize">Label Size</Label>
+          <div className="flex items-center justify-between">
+            <Label htmlFor="labelSize">Label Size</Label>
+            <CustomSizeDialog onSizeAdded={refreshSizes} />
+          </div>
           <Select
             value={`${selectedSize.width}x${selectedSize.height}`}
             onValueChange={(value) => {
-              const size = LABEL_SIZES.find(s => `${s.width}x${s.height}` === value);
+              const size = labelSizes.find(s => `${s.width}x${s.height}` === value);
               if (size) onSizeChange(size);
             }}
           >
@@ -72,7 +81,7 @@ const LabelForm = ({ data, onChange, selectedSize, onSizeChange, onReset }: Labe
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              {LABEL_SIZES.map((size) => (
+              {labelSizes.map((size) => (
                 <SelectItem key={`${size.width}x${size.height}`} value={`${size.width}x${size.height}`}>
                   {size.name}
                 </SelectItem>

@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { LabelData, LabelSize, LABEL_SIZES, DEFAULT_LABEL_DATA, LabelTemplate, getTemplates, saveTemplate, generateTemplateId } from '@/types/label';
+import { LabelData, LabelSize, DEFAULT_LABEL_SIZES, getAllLabelSizes, DEFAULT_LABEL_DATA, LabelTemplate, getTemplates, saveTemplate, generateTemplateId } from '@/types/label';
 import LabelForm from '@/components/LabelForm';
 import LabelPreview from '@/components/LabelPreview';
 import PrintableLabel from '@/components/PrintableLabel';
@@ -22,7 +22,7 @@ import {
 
 const Index = () => {
   const [labelData, setLabelData] = useState<LabelData>(DEFAULT_LABEL_DATA);
-  const [selectedSize, setSelectedSize] = useState<LabelSize>(LABEL_SIZES[0]);
+  const [selectedSize, setSelectedSize] = useState<LabelSize>(DEFAULT_LABEL_SIZES[0]);
   const [previewScale, setPreviewScale] = useState(4);
   const [quantity, setQuantity] = useState(1);
   const [templates, setTemplates] = useState<LabelTemplate[]>([]);

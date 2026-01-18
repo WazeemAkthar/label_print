@@ -27,14 +27,41 @@ export interface LabelSize {
   width: number;
   height: number;
   name: string;
+  isCustom?: boolean;
 }
 
-export const LABEL_SIZES: LabelSize[] = [
+export const DEFAULT_LABEL_SIZES: LabelSize[] = [
   { width: 38, height: 25, name: '38mm × 25mm (Standard)' },
   { width: 38, height: 50, name: '38mm × 25mm (2 Lines)' },
   { width: 50, height: 25, name: '50mm × 25mm (Wide)' },
   { width: 38, height: 38, name: '38mm × 38mm (Square)' },
 ];
+
+const CUSTOM_SIZES_STORAGE_KEY = 'labelmaker-custom-sizes';
+
+export const getCustomSizes = (): LabelSize[] => {
+  try {
+    const stored = localStorage.getItem(CUSTOM_SIZES_STORAGE_KEY);
+    return stored ? JSON.parse(stored) : [];
+  } catch {
+    return [];
+  }
+};
+
+export const saveCustomSize = (size: LabelSize): void => {
+  const sizes = getCustomSizes();
+  sizes.push({ ...size, isCustom: true });
+  localStorage.setItem(CUSTOM_SIZES_STORAGE_KEY, JSON.stringify(sizes));
+};
+
+export const deleteCustomSize = (width: number, height: number): void => {
+  const sizes = getCustomSizes().filter(s => !(s.width === width && s.height === height));
+  localStorage.setItem(CUSTOM_SIZES_STORAGE_KEY, JSON.stringify(sizes));
+};
+
+export const getAllLabelSizes = (): LabelSize[] => {
+  return [...DEFAULT_LABEL_SIZES, ...getCustomSizes()];
+};
 
 export const DEFAULT_FONT_SIZES: FontSizes = {
   shopName: 10,
