@@ -111,20 +111,20 @@ const Index = () => {
         <div class="shop-name" style="font-size: ${labelData.fontSizes.shopName}px;">${labelData.shopName}</div>
         <div class="product-name" style="font-size: ${labelData.fontSizes.productName}px;">${labelData.productName}</div>
         <div class="dates" style="font-size: ${labelData.fontSizes.dates}px;">
-          <span>MFG: ${formatDateForPrint(labelData.mfgDate)}</span>
-          <span>EXP: ${formatDateForPrint(labelData.expDate)}</span>
+          <div>MFG: ${formatDateForPrint(labelData.mfgDate)}</div>
+          <div>EXP: ${formatDateForPrint(labelData.expDate)}</div>
         </div>
         <div class="barcode-container">
           <svg id="barcode-${i}"></svg>
         </div>
-        <div class="price" style="font-size: ${labelData.fontSizes.price}px;">Rs ${labelData.price}/=</div>
+        <div class="price" style="font-size: ${labelData.fontSizes.price}px;">Rs. ${labelData.price}/=</div>
       </div>
     `).join('');
 
     const barcodeScripts = Array(quantity).fill(null).map((_, i) => `
       JsBarcode("#barcode-${i}", "${labelData.barcodeValue}", {
         format: "CODE128",
-        width: 1,
+        width: 2,
         height: 20,
         displayValue: false,
         margin: 0
@@ -174,9 +174,9 @@ const Index = () => {
           }
           .dates {
             color: #333;
-            display: flex;
-            justify-content: space-between;
+            text-align: center;
             margin-top: 2px;
+            line-height: 1.3;
           }
           .barcode-container {
             flex: 1;

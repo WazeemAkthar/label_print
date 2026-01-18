@@ -52,31 +52,31 @@ const LabelPreview = forwardRef<HTMLDivElement, LabelPreviewProps>(
           {data.productName || 'Product'}
         </div>
 
-        {/* Dates */}
+        {/* Dates - Stacked */}
         <div
-          className="flex justify-between text-muted-foreground"
-          style={{ fontSize: `${data.fontSizes.dates * fontScale}px`, marginTop: `${1 * scale}px` }}
+          className="text-muted-foreground text-center"
+          style={{ fontSize: `${data.fontSizes.dates * fontScale}px`, marginTop: `${1 * scale}px`, lineHeight: 1.3 }}
         >
-          <span>MFG: {formatDate(data.mfgDate)}</span>
-          <span>EXP: {formatDate(data.expDate)}</span>
+          <div>MFG: {formatDate(data.mfgDate)}</div>
+          <div>EXP: {formatDate(data.expDate)}</div>
         </div>
 
-        {/* Barcode */}
-        <div className="flex-1 flex items-center justify-center" style={{ marginTop: `${1 * scale}px` }}>
+        {/* Barcode - Full Width */}
+        <div className="flex-1 flex items-center justify-center w-full" style={{ marginTop: `${1 * scale}px` }}>
           <Barcode
             value={data.barcodeValue}
-            width={1.2 * (scale / 3)}
+            width={2 * (scale / 3)}
             height={18 * scale}
             displayValue={false}
           />
         </div>
 
-        {/* Price - Always Rs with /= */}
+        {/* Price - Rs. with /= */}
         <div
           className="font-bold text-foreground text-center"
           style={{ fontSize: `${data.fontSizes.price * fontScale}px`, lineHeight: 1 }}
         >
-          Rs {data.price || '0'}/=
+          Rs. {data.price || '0'}/=
         </div>
       </div>
     );
