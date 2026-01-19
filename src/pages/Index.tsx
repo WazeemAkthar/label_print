@@ -1,15 +1,35 @@
-import { useState, useRef, useEffect } from 'react';
-import { LabelData, LabelSize, DEFAULT_LABEL_SIZES, getAllLabelSizes, DEFAULT_LABEL_DATA, LabelTemplate, getTemplates, saveTemplate, generateTemplateId } from '@/types/label';
-import LabelForm from '@/components/LabelForm';
-import LabelPreview from '@/components/LabelPreview';
-import PrintableLabel from '@/components/PrintableLabel';
-import SavedTemplates from '@/components/SavedTemplates';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Printer, Download, Tag, ZoomIn, ZoomOut, Minus, Plus, Copy, Save } from 'lucide-react';
-import { toast } from 'sonner';
+import { useState, useRef, useEffect } from "react";
+import {
+  LabelData,
+  LabelSize,
+  DEFAULT_LABEL_SIZES,
+  getAllLabelSizes,
+  DEFAULT_LABEL_DATA,
+  LabelTemplate,
+  getTemplates,
+  saveTemplate,
+  generateTemplateId,
+} from "@/types/label";
+import LabelForm from "@/components/LabelForm";
+import LabelPreview from "@/components/LabelPreview";
+import PrintableLabel from "@/components/PrintableLabel";
+import SavedTemplates from "@/components/SavedTemplates";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Printer,
+  Download,
+  Tag,
+  ZoomIn,
+  ZoomOut,
+  Minus,
+  Plus,
+  Copy,
+  Save,
+} from "lucide-react";
+import { toast } from "sonner";
 import {
   Dialog,
   DialogContent,
@@ -18,17 +38,21 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from '@/components/ui/dialog';
+} from "@/components/ui/dialog";
 
 const Index = () => {
   const [labelData, setLabelData] = useState<LabelData>(DEFAULT_LABEL_DATA);
-  const [selectedSize, setSelectedSize] = useState<LabelSize>(DEFAULT_LABEL_SIZES[0]);
+  const [selectedSize, setSelectedSize] = useState<LabelSize>(
+    DEFAULT_LABEL_SIZES[0],
+  );
   const [previewScale, setPreviewScale] = useState(4);
   const [quantity, setQuantity] = useState(1);
   const [templates, setTemplates] = useState<LabelTemplate[]>([]);
-  const [templateName, setTemplateName] = useState('');
+  const [templateName, setTemplateName] = useState("");
   const [saveDialogOpen, setSaveDialogOpen] = useState(false);
-  const [editingTemplate, setEditingTemplate] = useState<LabelTemplate | null>(null);
+  const [editingTemplate, setEditingTemplate] = useState<LabelTemplate | null>(
+    null,
+  );
   const printRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -42,7 +66,7 @@ const Index = () => {
   const handleReset = () => {
     setLabelData(DEFAULT_LABEL_DATA);
     setQuantity(1);
-    toast.success('Label reset to defaults');
+    toast.success("Label reset to defaults");
   };
 
   const handleQuantityChange = (newQty: number) => {
@@ -51,7 +75,7 @@ const Index = () => {
 
   const handleSaveTemplate = async () => {
     if (!templateName.trim()) {
-      toast.error('Please enter a template name');
+      toast.error("Please enter a template name");
       return;
     }
 
@@ -72,12 +96,12 @@ const Index = () => {
       // Load the saved template data back into the form
       setLabelData(template.data);
 
-      setTemplateName('');
+      setTemplateName("");
       setEditingTemplate(null);
       setSaveDialogOpen(false);
       toast.success(`Template "${template.name}" saved and loaded`);
     } catch (error) {
-      toast.error('Failed to save template. Please try again.');
+      toast.error("Failed to save template. Please try again.");
     }
   };
 
@@ -92,27 +116,42 @@ const Index = () => {
     setLabelData(data);
   };
 
-  const handleDeleteTemplate = (id: string) => {
-    setTemplates(templates.filter(t => t.id !== id));
+  const handleDeleteTemplate = async (id: string) => {
+    try {
+      const templateToDelete = templates.find((t) => t.id === id);
+
+      // Delete from storage
+      await window.Storage.delete(`template:${id}`);
+
+      // Update local state
+      setTemplates(templates.filter((t) => t.id !== id));
+
+      toast.success(
+        `Template "${templateToDelete?.name || "Unknown"}" deleted`,
+      );
+    } catch (error) {
+      toast.error("Failed to delete template. Please try again.");
+      console.error("Delete error:", error);
+    }
   };
 
   const handleDialogClose = (open: boolean) => {
     if (!open) {
       setEditingTemplate(null);
-      setTemplateName('');
+      setTemplateName("");
     }
     setSaveDialogOpen(open);
   };
 
   const handlePrint = () => {
     if (!labelData.barcodeValue) {
-      toast.error('Please enter or generate a barcode value');
+      toast.error("Please enter or generate a barcode value");
       return;
     }
 
-    const printWindow = window.open('', '_blank');
+    const printWindow = window.open("", "_blank");
     if (!printWindow) {
-      toast.error('Unable to open print window. Please check popup blocker.');
+      toast.error("Unable to open print window. Please check popup blocker.");
       return;
     }
 
@@ -122,135 +161,151 @@ const Index = () => {
     const heightPx = selectedSize.height * pxPerMm;
     const totalPageWidth = widthPx * columns;
 
-    // Group labels into rows based on columns
     const labelsPerRow = columns;
     const totalRows = Math.ceil(quantity / labelsPerRow);
-    
-    let labelsHtml = '';
+
+    let labelsHtml = "";
     let barcodeIndex = 0;
-    
+
     for (let row = 0; row < totalRows; row++) {
       const isNewPage = row > 0;
-      labelsHtml += `<div class="label-row" ${isNewPage ? 'style="page-break-before: always;"' : ''}>`;
-      
+      labelsHtml += `<div class="label-row" ${isNewPage ? 'style="page-break-before: always;"' : ""}>`;
+
       for (let col = 0; col < labelsPerRow && barcodeIndex < quantity; col++) {
         labelsHtml += `
-          <div class="label">
-            <div class="shop-name" style="font-size: ${labelData.fontSizes.shopName}px;">${labelData.shopName}</div>
-            <div class="product-name" style="font-size: ${labelData.fontSizes.productName}px;">${labelData.productName}</div>
-            <div class="price" style="font-size: ${labelData.fontSizes.price}px;">Rs. ${labelData.price}/=</div>
-            <div class="dates" style="font-size: ${labelData.fontSizes.dates}px;">
-              <div>MFG: ${formatDateForPrint(labelData.mfgDate)}</div>
-              <div>EXP: ${formatDateForPrint(labelData.expDate)}</div>
-            </div>
-            <div class="barcode-container">
-              <svg id="barcode-${barcodeIndex}"></svg>
-            </div>
+        <div class="label">
+          <div class="shop-name">${labelData.shopName}</div>
+          <div class="dates-row">
+            <span>MF.Date:${formatDateForPrint(labelData.mfgDate)}</span>
           </div>
-        `;
+          <div class="dates-row">
+            <span>EX.Date:${formatDateForPrint(labelData.expDate)}</span>
+          </div>
+          <div class="price-row">
+            <span>Price  : Rs.${labelData.price}</span>
+          </div>
+          <div class="barcode-container">
+            <svg id="barcode-${barcodeIndex}"></svg>
+          </div>
+        </div>
+      `;
         barcodeIndex++;
       }
-      
-      labelsHtml += '</div>';
+
+      labelsHtml += "</div>";
     }
 
-    const barcodeScripts = Array(quantity).fill(null).map((_, i) => `
-      JsBarcode("#barcode-${i}", "${labelData.barcodeValue}", {
-        format: "CODE128",
-        width: ${columns > 1 ? 1.5 : 2},
-        height: ${columns > 2 ? 22 : 28},
-        displayValue: true,
-        fontSize: ${columns > 2 ? 6 : 8},
-        margin: 0
-      });
-    `).join('');
+    const barcodeScripts = Array(quantity)
+      .fill(null)
+      .map(
+        (_, i) => `
+    JsBarcode("#barcode-${i}", "${labelData.barcodeValue}", {
+      format: "CODE128",
+      width: 1.8,
+      height: 35,
+      displayValue: true,
+      fontSize: 10,
+      margin: 0,
+      marginTop: 0,
+      marginBottom: 0
+    });
+  `,
+      )
+      .join("");
 
     printWindow.document.write(`
-      <!DOCTYPE html>
-      <html>
-      <head>
-        <title>Print ${quantity} Label${quantity > 1 ? 's' : ''}</title>
-        <style>
-          @page {
-            margin: 0;
-            size: ${selectedSize.width * columns}mm ${selectedSize.height}mm;
-          }
-          * { margin: 0; padding: 0; box-sizing: border-box; }
-          body { 
-            font-family: Arial, sans-serif;
-            -webkit-print-color-adjust: exact;
-            print-color-adjust: exact;
-          }
-          .label-row {
-            display: flex;
-            flex-direction: row;
-            width: ${totalPageWidth}px;
-          }
-          .label {
-            width: ${widthPx}px;
-            height: ${heightPx}px;
-            padding: 2px;
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
-            background: white;
-            flex-shrink: 0;
-          }
-          .shop-name {
-            font-weight: bold;
-            text-align: center;
-            line-height: 1.2;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-          }
-          .product-name {
-            text-align: center;
-            line-height: 1.2;
-            margin-top: 1px;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-          }
-          .price {
-            font-weight: bold;
-            text-align: center;
-            line-height: 1;
-            margin-top: 1px;
-          }
-          .dates {
-            color: #333;
-            text-align: center;
-            margin-top: 1px;
-            line-height: 1.3;
-          }
-          .barcode-container {
-            flex: 1;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-top: 1px;
-          }
-        </style>
-        <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"><\/script>
-      </head>
-      <body>
-        ${labelsHtml}
-        <script>
-          ${barcodeScripts}
-          setTimeout(() => window.print(), 200);
-        <\/script>
-      </body>
-      </html>
-    `);
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <title>Print ${quantity} Label${quantity > 1 ? "s" : ""}</title>
+      <style>
+        @page {
+          margin: 0;
+          size: ${selectedSize.width * columns}mm ${selectedSize.height}mm;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+          font-family: 'Courier New', monospace;
+          -webkit-print-color-adjust: exact;
+          print-color-adjust: exact;
+        }
+        .label-row {
+          display: flex;
+          flex-direction: row;
+          width: ${totalPageWidth}px;
+        }
+        .label {
+          width: ${widthPx}px;
+          height: ${heightPx}px;
+          padding: 3px 4px;
+          display: flex;
+          flex-direction: column;
+          overflow: hidden;
+          background: white;
+          flex-shrink: 0;
+        }
+        .shop-name {
+          font-weight: bold;
+          font-size: 11px;
+          text-align: center;
+          line-height: 1.1;
+          letter-spacing: 1px;
+          margin-bottom: 2px;
+        }
+        .product-name {
+          font-size: 9px;
+          text-align: left;
+          line-height: 1.1;
+          margin-bottom: 1px;
+        }
+        .dates-row {
+          font-size: 8px;
+          text-align: left;
+          line-height: 1.2;
+          margin-bottom: 1px;
+        }
+        .price-row {
+          font-size: 9px;
+          font-weight: bold;
+          text-align: left;
+          line-height: 1.2;
+          margin-bottom: 2px;
+        }
+        .barcode-container {
+          flex: 1;
+          display: flex;
+          align-items: flex-end;
+          justify-content: center;
+          margin-top: 1px;
+        }
+        .barcode-container svg {
+          max-width: 100%;
+        }
+      </style>
+      <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
+    </head>
+    <body>
+      ${labelsHtml}
+      <script>
+        ${barcodeScripts}
+        setTimeout(() => window.print(), 200);
+      </script>
+    </body>
+    </html>
+  `);
     printWindow.document.close();
-    toast.success(`Print dialog opened for ${quantity} label${quantity > 1 ? 's' : ''} (${columns} column${columns > 1 ? 's' : ''})`);
+    toast.success(
+      `Print dialog opened for ${quantity} label${quantity > 1 ? "s" : ""} (${columns} column${columns > 1 ? "s" : ""})`,
+    );
   };
 
   const formatDateForPrint = (dateStr: string) => {
     try {
       const date = new Date(dateStr);
-      return date.toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' }).replace(/\//g, '-');
+      const day = String(date.getDate()).padStart(2, "0");
+      const month = String(date.getMonth() + 1).padStart(2, "0");
+      const year = date.getFullYear();
+      return `${day}.${month}.${year}`;
     } catch {
       return dateStr;
     }
@@ -258,7 +313,7 @@ const Index = () => {
 
   const handleDownloadPDF = () => {
     if (!labelData.barcodeValue) {
-      toast.error('Please enter or generate a barcode value');
+      toast.error("Please enter or generate a barcode value");
       return;
     }
     toast.info('Use "Save as PDF" in the print dialog to download');
@@ -276,7 +331,9 @@ const Index = () => {
             </div>
             <div>
               <h1 className="text-xl font-bold text-foreground">LabelFlow</h1>
-              <p className="text-sm text-muted-foreground">Create print-ready barcode labels</p>
+              <p className="text-sm text-muted-foreground">
+                Create print-ready barcode labels
+              </p>
             </div>
           </div>
         </div>
@@ -305,11 +362,13 @@ const Index = () => {
               </DialogTrigger>
               <DialogContent>
                 <DialogHeader>
-                  <DialogTitle>{editingTemplate ? 'Update Template' : 'Save Template'}</DialogTitle>
+                  <DialogTitle>
+                    {editingTemplate ? "Update Template" : "Save Template"}
+                  </DialogTitle>
                   <DialogDescription>
-                    {editingTemplate 
-                      ? 'Update this template with the current label configuration.'
-                      : 'Save your current label configuration for quick reuse later.'}
+                    {editingTemplate
+                      ? "Update this template with the current label configuration."
+                      : "Save your current label configuration for quick reuse later."}
                   </DialogDescription>
                 </DialogHeader>
                 <div className="py-4">
@@ -320,15 +379,21 @@ const Index = () => {
                     onChange={(e) => setTemplateName(e.target.value)}
                     placeholder="e.g., Milk Powder Label"
                     className="mt-2"
-                    onKeyDown={(e) => e.key === 'Enter' && handleSaveTemplate()}
+                    onKeyDown={(e) => e.key === "Enter" && handleSaveTemplate()}
                   />
                 </div>
                 <DialogFooter>
-                  <Button variant="outline" onClick={() => handleDialogClose(false)}>
+                  <Button
+                    variant="outline"
+                    onClick={() => handleDialogClose(false)}
+                  >
                     Cancel
                   </Button>
-                  <Button onClick={handleSaveTemplate} className="bg-accent text-accent-foreground hover:bg-accent/90">
-                    {editingTemplate ? 'Update Template' : 'Save Template'}
+                  <Button
+                    onClick={handleSaveTemplate}
+                    className="bg-accent text-accent-foreground hover:bg-accent/90"
+                  >
+                    {editingTemplate ? "Update Template" : "Save Template"}
                   </Button>
                 </DialogFooter>
               </DialogContent>
@@ -349,24 +414,30 @@ const Index = () => {
             <Card>
               <CardHeader className="pb-3">
                 <div className="flex items-center justify-between">
-                  <CardTitle className="text-lg font-semibold">Live Preview</CardTitle>
+                  <CardTitle className="text-lg font-semibold">
+                    Live Preview
+                  </CardTitle>
                   <div className="flex items-center gap-1">
                     <Button
                       variant="ghost"
                       size="icon"
-                      onClick={() => setPreviewScale(Math.max(2, previewScale - 1))}
+                      onClick={() =>
+                        setPreviewScale(Math.max(2, previewScale - 1))
+                      }
                       disabled={previewScale <= 2}
                       className="h-8 w-8"
                     >
                       <ZoomOut className="w-4 h-4" />
                     </Button>
                     <span className="text-sm text-muted-foreground w-12 text-center">
-                      {Math.round(previewScale / 3 * 100)}%
+                      {Math.round((previewScale / 3) * 100)}%
                     </span>
                     <Button
                       variant="ghost"
                       size="icon"
-                      onClick={() => setPreviewScale(Math.min(6, previewScale + 1))}
+                      onClick={() =>
+                        setPreviewScale(Math.min(6, previewScale + 1))
+                      }
                       disabled={previewScale >= 6}
                       className="h-8 w-8"
                     >
@@ -395,7 +466,9 @@ const Index = () => {
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <Copy className="w-4 h-4 text-muted-foreground" />
-                    <Label className="text-sm font-medium">Print Quantity</Label>
+                    <Label className="text-sm font-medium">
+                      Print Quantity
+                    </Label>
                   </div>
                   <div className="flex items-center gap-2">
                     <Button
@@ -410,7 +483,9 @@ const Index = () => {
                     <Input
                       type="number"
                       value={quantity}
-                      onChange={(e) => handleQuantityChange(parseInt(e.target.value) || 1)}
+                      onChange={(e) =>
+                        handleQuantityChange(parseInt(e.target.value) || 1)
+                      }
                       className="w-16 h-8 text-center font-medium"
                       min={1}
                       max={100}
@@ -427,7 +502,9 @@ const Index = () => {
                   </div>
                 </div>
                 <p className="text-xs text-muted-foreground mt-2">
-                  {quantity > 1 ? `Will print ${quantity} identical labels` : 'Print a single label'}
+                  {quantity > 1
+                    ? `Will print ${quantity} identical labels`
+                    : "Print a single label"}
                 </p>
               </CardContent>
             </Card>
@@ -440,7 +517,7 @@ const Index = () => {
                 disabled={!labelData.barcodeValue}
               >
                 <Printer className="w-5 h-5 mr-2" />
-                Print {quantity > 1 ? `${quantity} Labels` : 'Label'}
+                Print {quantity > 1 ? `${quantity} Labels` : "Label"}
               </Button>
               <Button
                 onClick={handleDownloadPDF}
@@ -455,7 +532,9 @@ const Index = () => {
 
             {/* Info Box */}
             <div className="p-4 bg-muted rounded-lg">
-              <h3 className="font-medium text-sm text-foreground mb-2">Quick Tips</h3>
+              <h3 className="font-medium text-sm text-foreground mb-2">
+                Quick Tips
+              </h3>
               <ul className="text-sm text-muted-foreground space-y-1">
                 <li>• Save frequently used labels as templates</li>
                 <li>• Click the pencil icon to edit existing templates</li>

@@ -35,6 +35,7 @@ export interface LabelSize {
 }
 
 export const DEFAULT_LABEL_SIZES: LabelSize[] = [
+  { width: 38, height: 28, name: '38mm × 28mm (Standard)', columns: 1 },
   { width: 38, height: 25, name: '38mm × 25mm (Standard)', columns: 1 },
   { width: 38, height: 50, name: '38mm × 25mm (2 Lines)', columns: 1 },
   { width: 50, height: 25, name: '50mm × 25mm (Wide)', columns: 1 },
