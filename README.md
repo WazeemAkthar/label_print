@@ -1,73 +1,64 @@
-# Welcome to your Lovable project
+# LabelFlow
 
-## Project info
+Create and print professional barcode labels with custom sizes and templates.
 
-**URL**: https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID
+## Features
 
-## How can I edit this code?
+- Generate barcode labels with product information
+- Multiple preset label sizes (38mm × 25mm, 50mm × 25mm, etc.)
+- Custom label size support
+- Multi-column printing layouts
+- Save and load templates to Firebase
+- Real-time preview with zoom controls
+- Print multiple labels at once
 
-There are several ways of editing your application.
-
-**Use Lovable**
-
-Simply visit the [Lovable Project](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and start prompting.
-
-Changes made via Lovable will be committed automatically to this repo.
+## Development
 
 **Use your preferred IDE**
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+Clone this repo and start developing:
 
 The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
 
 Follow these steps:
 
 ```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+# Step 1: Clone the repository
+git clone https://github.com/ClancodeLabs/rapid-print-labels.git
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+# Step 2: Navigate to the project directory
+cd rapid-print-labels
 
-# Step 3: Install the necessary dependencies.
-npm i
+# Step 3: Install dependencies
+npm install
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
+# Step 4: Start the development server
 npm run dev
 ```
 
-**Edit a file directly in GitHub**
-
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
-
-**Use GitHub Codespaces**
-
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
-
-## What technologies are used for this project?
+## Technologies
 
 This project is built with:
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+- **Vite** - Fast build tool
+- **TypeScript** - Type safety
+- **React** - UI framework
+- **shadcn-ui** - Component library
+- **Tailwind CSS** - Styling
+- **Firebase Firestore** - Cloud database for templates
+- **JsBarcode** - Barcode generation
 
-## How can I deploy this project?
+## Firebase Setup
 
-Simply open [Lovable](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and click on Share -> Publish.
+1. Create a Firebase project at https://console.firebase.google.com/
+2. Enable Firestore Database
+3. Update the Firebase config in `src/lib/firebase.ts`
+4. Set Firestore security rules to allow read/write access
 
-## Can I connect a custom domain to my Lovable project?
+## Build for Production
 
-Yes, you can!
+```sh
+npm run build
+```
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
-
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+The build output will be in the `dist` directory.

@@ -32,7 +32,11 @@ const Index = () => {
   const printRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    setTemplates(getTemplates());
+    const loadTemplates = async () => {
+      const loadedTemplates = await getTemplates();
+      setTemplates(loadedTemplates);
+    };
+    loadTemplates();
   }, []);
 
   const handleReset = () => {
@@ -45,26 +49,36 @@ const Index = () => {
     setQuantity(Math.max(1, Math.min(100, newQty)));
   };
 
-  const handleSaveTemplate = () => {
+  const handleSaveTemplate = async () => {
     if (!templateName.trim()) {
       toast.error('Please enter a template name');
       return;
     }
 
+    // Always create a new template (allow multiple saves)
     const template: LabelTemplate = {
-      id: editingTemplate?.id || generateTemplateId(),
+      id: generateTemplateId(),
       name: templateName.trim(),
       data: { ...labelData },
-      createdAt: editingTemplate?.createdAt || Date.now(),
-      updatedAt: editingTemplate ? Date.now() : undefined,
+      createdAt: Date.now(),
+      updatedAt: undefined,
     };
 
-    saveTemplate(template);
-    setTemplates(getTemplates());
-    setTemplateName('');
-    setEditingTemplate(null);
-    setSaveDialogOpen(false);
-    toast.success(editingTemplate ? `Template "${template.name}" updated` : `Template "${template.name}" saved`);
+    try {
+      await saveTemplate(template);
+      const updatedTemplates = await getTemplates();
+      setTemplates(updatedTemplates);
+
+      // Load the saved template data back into the form
+      setLabelData(template.data);
+
+      setTemplateName('');
+      setEditingTemplate(null);
+      setSaveDialogOpen(false);
+      toast.success(`Template "${template.name}" saved and loaded`);
+    } catch (error) {
+      toast.error('Failed to save template. Please try again.');
+    }
   };
 
   const handleEditTemplate = (template: LabelTemplate) => {
@@ -261,7 +275,7 @@ const Index = () => {
               <Tag className="w-6 h-6 text-accent-foreground" />
             </div>
             <div>
-              <h1 className="text-xl font-bold text-foreground">LabelMaker Pro</h1>
+              <h1 className="text-xl font-bold text-foreground">LabelFlow</h1>
               <p className="text-sm text-muted-foreground">Create print-ready barcode labels</p>
             </div>
           </div>

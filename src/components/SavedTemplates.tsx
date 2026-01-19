@@ -32,10 +32,14 @@ const SavedTemplates = ({ templates, onLoad, onDelete, onEdit }: SavedTemplatesP
     toast.success(`Loaded "${template.name}"`);
   };
 
-  const handleDelete = (template: LabelTemplate) => {
-    deleteTemplate(template.id);
-    onDelete(template.id);
-    toast.success(`Deleted "${template.name}"`);
+  const handleDelete = async (template: LabelTemplate) => {
+    try {
+      await deleteTemplate(template.id);
+      onDelete(template.id);
+      toast.success(`Deleted "${template.name}"`);
+    } catch (error) {
+      toast.error('Failed to delete template. Please try again.');
+    }
   };
 
   const formatDate = (timestamp: number) => {

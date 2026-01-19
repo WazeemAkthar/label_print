@@ -1,3 +1,6 @@
+import { db } from '@/lib/firebase';
+import { collection, addDoc, getDocs, updateDoc, deleteDoc, doc, query, orderBy } from 'firebase/firestore';
+
 export interface FontSizes {
   shopName: number;
   productName: number;
@@ -38,7 +41,7 @@ export const DEFAULT_LABEL_SIZES: LabelSize[] = [
   { width: 38, height: 38, name: '38mm × 38mm (Square)', columns: 1 },
 ];
 
-const CUSTOM_SIZES_STORAGE_KEY = 'labelmaker-custom-sizes';
+const CUSTOM_SIZES_STORAGE_KEY = 'labelflow-custom-sizes';
 
 export const getCustomSizes = (): LabelSize[] => {
   try {
@@ -81,39 +84,72 @@ export const DEFAULT_LABEL_DATA: LabelData = {
   fontSizes: { ...DEFAULT_FONT_SIZES },
 };
 
-const TEMPLATES_STORAGE_KEY = 'labelmaker-templates';
+const TEMPLATES_COLLECTION = 'templates';
 
-export const saveTemplate = (template: LabelTemplate): void => {
-  const templates = getTemplates();
-  const existingIndex = templates.findIndex(t => t.id === template.id);
-  if (existingIndex >= 0) {
-    templates[existingIndex] = { ...template, updatedAt: Date.now() };
-  } else {
-    templates.unshift(template);
+export const saveTemplate = async (template: LabelTemplate): Promise<void> => {
+  try {
+    if (template.id.startsWith('tpl_')) {
+      // New template - add to Firestore
+      const templatesRef = collection(db, TEMPLATES_COLLECTION);
+      const docRef = await addDoc(templatesRef, {
+        ...template,
+        createdAt: template.createdAt,
+        updatedAt: Date.now(),
+      });
+      // Update the template with the Firestore document ID
+      await updateDoc(doc(db, TEMPLATES_COLLECTION, docRef.id), {
+        id: docRef.id,
+      });
+    } else {
+      // Update existing template
+      const templateRef = doc(db, TEMPLATES_COLLECTION, template.id);
+      await updateDoc(templateRef, {
+        ...template,
+        updatedAt: Date.now(),
+      });
+    }
+  } catch (error) {
+    console.error('Error saving template:', error);
+    throw error;
   }
-  localStorage.setItem(TEMPLATES_STORAGE_KEY, JSON.stringify(templates));
 };
 
-export const getTemplates = (): LabelTemplate[] => {
+export const getTemplates = async (): Promise<LabelTemplate[]> => {
   try {
-    const stored = localStorage.getItem(TEMPLATES_STORAGE_KEY);
-    const templates = stored ? JSON.parse(stored) : [];
-    // Migrate old templates without fontSizes
-    return templates.map((t: LabelTemplate) => ({
-      ...t,
-      data: {
-        ...t.data,
-        fontSizes: t.data.fontSizes || { ...DEFAULT_FONT_SIZES },
-      },
-    }));
-  } catch {
+    const templatesRef = collection(db, TEMPLATES_COLLECTION);
+    const q = query(templatesRef, orderBy('createdAt', 'desc'));
+    const querySnapshot = await getDocs(q);
+
+    const templates: LabelTemplate[] = [];
+    querySnapshot.forEach((doc) => {
+      const data = doc.data();
+      templates.push({
+        id: doc.id,
+        name: data.name,
+        data: {
+          ...data.data,
+          fontSizes: data.data.fontSizes || { ...DEFAULT_FONT_SIZES },
+        },
+        createdAt: data.createdAt,
+        updatedAt: data.updatedAt,
+      });
+    });
+
+    return templates;
+  } catch (error) {
+    console.error('Error getting templates:', error);
     return [];
   }
 };
 
-export const deleteTemplate = (id: string): void => {
-  const templates = getTemplates().filter(t => t.id !== id);
-  localStorage.setItem(TEMPLATES_STORAGE_KEY, JSON.stringify(templates));
+export const deleteTemplate = async (id: string): Promise<void> => {
+  try {
+    const templateRef = doc(db, TEMPLATES_COLLECTION, id);
+    await deleteDoc(templateRef);
+  } catch (error) {
+    console.error('Error deleting template:', error);
+    throw error;
+  }
 };
 
 export const generateTemplateId = (): string => {
