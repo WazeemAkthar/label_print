@@ -156,3 +156,4 @@ export const deleteTemplate = async (id: string): Promise<void> => {
 export const generateTemplateId = (): string => {
   return `tpl_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
 };
+

@@ -1,15 +1,5 @@
 import { useState, useRef, useEffect } from "react";
-import {
-  LabelData,
-  LabelSize,
-  DEFAULT_LABEL_SIZES,
-  getAllLabelSizes,
-  DEFAULT_LABEL_DATA,
-  LabelTemplate,
-  getTemplates,
-  saveTemplate,
-  generateTemplateId,
-} from "@/types/label";
+import { LabelData, LabelSize, DEFAULT_LABEL_SIZES, getAllLabelSizes, DEFAULT_LABEL_DATA, LabelTemplate, getTemplates, saveTemplate, deleteTemplate, generateTemplateId } from '@/types/label';
 import LabelForm from "@/components/LabelForm";
 import LabelPreview from "@/components/LabelPreview";
 import PrintableLabel from "@/components/PrintableLabel";
@@ -39,6 +29,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+
 
 const Index = () => {
   const [labelData, setLabelData] = useState<LabelData>(DEFAULT_LABEL_DATA);
