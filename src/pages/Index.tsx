@@ -173,7 +173,7 @@ const Index = () => {
             <span>EX.Date:${formatDateForPrint(labelData.expDate)}</span>
           </div>
           <div class="price-row">
-            <span>Price  : Rs.${labelData.price}</span>
+            <span>Price  : Rs.${labelData.price} /=</span>
           </div>
           <div class="barcode-container">
             <svg id="barcode-${barcodeIndex}"></svg>
@@ -193,7 +193,7 @@ const Index = () => {
     JsBarcode("#barcode-${i}", "${labelData.barcodeValue}", {
       format: "CODE128",
       width: 1.8,
-      height: 35,
+      height: 25,
       displayValue: true,
       fontSize: 10,
       margin: 0,
@@ -237,26 +237,27 @@ const Index = () => {
         }
         .shop-name {
           font-weight: bold;
-          font-size: 11px;
+          font-size: 12px;
           text-align: center;
           line-height: 1.1;
           letter-spacing: 1px;
           margin-bottom: 2px;
         }
         .product-name {
-          font-size: 9px;
+          font-size: 10px;
           text-align: left;
           line-height: 1.1;
           margin-bottom: 1px;
         }
         .dates-row {
-          font-size: 8px;
+          font-size: 12px;
           text-align: left;
           line-height: 1.2;
           margin-bottom: 1px;
+          font-weight: bold;
         }
         .price-row {
-          font-size: 9px;
+          font-size: 12px;
           font-weight: bold;
           text-align: left;
           line-height: 1.2;
