@@ -115,7 +115,7 @@ const LabelForm = ({ data, onChange, selectedSize, onSizeChange, onReset }: Labe
         </div>
 
         {/* Dates Row */}
-        <div className="grid grid-cols-2 gap-3">
+        {/* <div className="grid grid-cols-2 gap-3">
           <div className="space-y-2">
             <Label htmlFor="mfgDate">Manufacture Date</Label>
             <Input
@@ -134,7 +134,7 @@ const LabelForm = ({ data, onChange, selectedSize, onSizeChange, onReset }: Labe
               onChange={(e) => updateField('expDate', e.target.value)}
             />
           </div>
-        </div>
+        </div> */}
 
         {/* Price - Currency fixed to Rs */}
         <div className="space-y-2">
@@ -222,7 +222,7 @@ const LabelForm = ({ data, onChange, selectedSize, onSizeChange, onReset }: Labe
                 />
               </div>
 
-              <div className="space-y-2">
+              {/* <div className="space-y-2">
                 <div className="flex justify-between text-sm">
                   <Label>Dates</Label>
                   <span className="text-muted-foreground">{data.fontSizes.dates}px</span>
@@ -234,7 +234,7 @@ const LabelForm = ({ data, onChange, selectedSize, onSizeChange, onReset }: Labe
                   max={10}
                   step={1}
                 />
-              </div>
+              </div> */}
 
               <div className="space-y-2">
                 <div className="flex justify-between text-sm">

@@ -14,13 +14,6 @@ const PrintableLabel = forwardRef<HTMLDivElement, PrintableLabelProps>(
     const widthPx = size.width * pxPerMm;
     const heightPx = size.height * pxPerMm;
 
-    const formatDate = (dateStr: string) => {
-      try {
-        return format(parseISO(dateStr), 'dd-MM-yyyy');
-      } catch {
-        return dateStr;
-      }
-    };
 
     return (
       <div
@@ -58,13 +51,13 @@ const PrintableLabel = forwardRef<HTMLDivElement, PrintableLabelProps>(
         </div>
 
         {/* Dates - Stacked */}
-        <div
+        {/* <div
           className="text-center"
           style={{ fontSize: `${data.fontSizes.dates}px`, marginTop: '1px', color: '#333', lineHeight: 1.3 }}
         >
           <div>MFG: {formatDate(data.mfgDate)}</div>
           <div>EXP: {formatDate(data.expDate)}</div>
-        </div>
+        </div> */}
 
         {/* Barcode - Full Width with Value */}
         <div className="flex-1 flex items-center justify-center w-full" style={{ marginTop: '1px' }}>
