@@ -229,6 +229,7 @@ const Index = () => {
         }
         .label-row {
           display: flex;
+          justify-content: space-evenly;
           flex-direction: row;
           width: ${totalPageWidth}px;
           gap: 2mm;
