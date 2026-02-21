@@ -79,7 +79,7 @@ export const DEFAULT_LABEL_DATA: LabelData = {
   productName: 'Product Name',
   mfgDate: new Date().toISOString().split('T')[0],
   expDate: new Date(Date.now() + 180 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-  price: '450',
+  price: '1000',
   barcodeValue: '',
   fontSizes: { ...DEFAULT_FONT_SIZES },
 };

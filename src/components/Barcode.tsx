@@ -12,9 +12,9 @@ interface BarcodeProps {
 const Barcode = ({ 
   value, 
   width = 1.5, 
-  height = 30, 
+  height = 20, 
   displayValue = false,
-  fontSize = 10 
+  fontSize = 16
 }: BarcodeProps) => {
   const svgRef = useRef<SVGSVGElement>(null);
 
