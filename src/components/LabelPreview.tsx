@@ -60,15 +60,6 @@ const LabelPreview = forwardRef<HTMLDivElement, LabelPreviewProps>(
           Rs. {data.price || '0'}/=
         </div>
 
-        {/* Dates - Stacked */}
-        <div
-          className="text-muted-foreground text-center"
-          style={{ fontSize: `${data.fontSizes.dates * fontScale}px`, marginTop: `${0.5 * scale}px`, lineHeight: 1.3 }}
-        >
-          <div>MFG: {formatDate(data.mfgDate)}</div>
-          <div>EXP: {formatDate(data.expDate)}</div>
-        </div>
-
         {/* Barcode - Full Width with Value */}
         <div className="flex-1 flex items-center justify-center w-full" style={{ marginTop: `${0.5 * scale}px` }}>
           <Barcode

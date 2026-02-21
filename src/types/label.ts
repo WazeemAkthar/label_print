@@ -35,8 +35,7 @@ export interface LabelSize {
 }
 
 export const DEFAULT_LABEL_SIZES: LabelSize[] = [
-  { width: 38, height: 28, name: '38mm × 28mm (Standard)', columns: 1 },
-  { width: 38, height: 25, name: '38mm × 25mm (Standard)', columns: 1 },
+  { width: 30, height: 15, name: '30mm × 15mm (Standard)', columns: 3 },
   { width: 38, height: 50, name: '38mm × 25mm (2 Lines)', columns: 1 },
   { width: 50, height: 25, name: '50mm × 25mm (Wide)', columns: 1 },
   { width: 38, height: 38, name: '38mm × 38mm (Square)', columns: 1 },
@@ -76,7 +75,7 @@ export const DEFAULT_FONT_SIZES: FontSizes = {
 };
 
 export const DEFAULT_LABEL_DATA: LabelData = {
-  shopName: 'My Shop',
+  shopName: 'LIFETIME',
   productName: 'Product Name',
   mfgDate: new Date().toISOString().split('T')[0],
   expDate: new Date(Date.now() + 180 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],

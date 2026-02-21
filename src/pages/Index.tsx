@@ -166,14 +166,8 @@ const Index = () => {
         labelsHtml += `
         <div class="label">
           <div class="shop-name">${labelData.shopName}</div>
-          <div class="dates-row">
-            <span>MF.Date:${formatDateForPrint(labelData.mfgDate)}</span>
-          </div>
-          <div class="dates-row">
-            <span>EX.Date:${formatDateForPrint(labelData.expDate)}</span>
-          </div>
           <div class="price-row">
-            <span>Price  : Rs.${labelData.price} /=</span>
+            <span>Rs.${labelData.price} /=</span>
           </div>
           <div class="barcode-container">
             <svg id="barcode-${barcodeIndex}"></svg>
@@ -237,38 +231,27 @@ const Index = () => {
         }
         .shop-name {
           font-weight: bold;
-          font-size: 12px;
+          font-size: 8px;
           text-align: center;
           line-height: 1.1;
           letter-spacing: 1px;
-          margin-bottom: 2px;
         }
         .product-name {
           font-size: 10px;
           text-align: left;
           line-height: 1.1;
-          margin-bottom: 1px;
-        }
-        .dates-row {
-          font-size: 12px;
-          text-align: left;
-          line-height: 1.2;
-          margin-bottom: 1px;
-          font-weight: bold;
         }
         .price-row {
           font-size: 12px;
           font-weight: bold;
           text-align: left;
           line-height: 1.2;
-          margin-bottom: 2px;
         }
         .barcode-container {
           flex: 1;
           display: flex;
           align-items: flex-end;
           justify-content: center;
-          margin-top: 1px;
         }
         .barcode-container svg {
           max-width: 100%;
