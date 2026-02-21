@@ -12,7 +12,7 @@ interface BarcodeProps {
 const Barcode = ({ 
   value, 
   width = 1.5, 
-  height = 20, 
+  height = 15, 
   displayValue = false,
   fontSize = 16
 }: BarcodeProps) => {

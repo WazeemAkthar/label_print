@@ -1,5 +1,16 @@
 import { useState, useRef, useEffect } from "react";
-import { LabelData, LabelSize, DEFAULT_LABEL_SIZES, getAllLabelSizes, DEFAULT_LABEL_DATA, LabelTemplate, getTemplates, saveTemplate, deleteTemplate, generateTemplateId } from '@/types/label';
+import {
+  LabelData,
+  LabelSize,
+  DEFAULT_LABEL_SIZES,
+  getAllLabelSizes,
+  DEFAULT_LABEL_DATA,
+  LabelTemplate,
+  getTemplates,
+  saveTemplate,
+  deleteTemplate,
+  generateTemplateId,
+} from "@/types/label";
 import LabelForm from "@/components/LabelForm";
 import LabelPreview from "@/components/LabelPreview";
 import PrintableLabel from "@/components/PrintableLabel";
@@ -29,7 +40,6 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-
 
 const Index = () => {
   const [labelData, setLabelData] = useState<LabelData>(DEFAULT_LABEL_DATA);
@@ -165,14 +175,17 @@ const Index = () => {
       for (let col = 0; col < labelsPerRow && barcodeIndex < quantity; col++) {
         labelsHtml += `
         <div class="label">
-          <div class="shop-name">${labelData.shopName}</div>
-          <div class="price-row">
-            <span>Rs.${labelData.price} /=</span>
-          </div>
-          <div class="barcode-container">
-            <svg id="barcode-${barcodeIndex}"></svg>
-          </div>
-        </div>
+  <div class="shop-name-side">${labelData.shopName}</div>
+  <div class="label-content">
+    <div class="price-row">
+      <span>Rs.${labelData.price} /=</span>
+    </div>
+    <div class="barcode-container">
+      <svg id="barcode-${barcodeIndex}"></svg>
+    </div>
+    <div class="product-name">${labelData.productName}</div>
+  </div>
+</div>
       `;
         barcodeIndex++;
       }
@@ -222,24 +235,41 @@ const Index = () => {
         .label {
           width: ${widthPx}px;
           height: ${heightPx}px;
-          padding: 3px 4px;
+          padding: 3px 2px;
           display: flex;
           flex-direction: column;
           overflow: hidden;
           background: white;
           flex-shrink: 0;
         }
-        .shop-name {
-          font-weight: bold;
-          font-size: 8px;
-          text-align: center;
-          line-height: 1.1;
-          letter-spacing: 1px;
-        }
+       /* REPLACE WITH: */
+.label {
+  display: flex;
+  flex-direction: row !important;
+}
+.shop-name-side {
+  writing-mode: vertical-rl;
+  transform: rotate(180deg);
+  font-weight: bold;
+  font-size: 8px;
+  text-align: center;
+  letter-spacing: 1px;
+  white-space: nowrap;
+  border-right: 1px solid #000;
+  padding-right: 2px;
+  margin-right: 3px;
+  flex-shrink: 0;
+}
+.label-content {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  // overflow: hidden;
+}
         .product-name {
           font-size: 10px;
           text-align: left;
-          line-height: 1.1;
+          // line-height: 1.1;
         }
         .price-row {
           font-size: 12px;
@@ -252,6 +282,8 @@ const Index = () => {
           display: flex;
           align-items: flex-end;
           justify-content: center;
+          height: 30px;
+          margin-top: 2px;
         }
         .barcode-container svg {
           max-width: 100%;
