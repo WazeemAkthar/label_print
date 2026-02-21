@@ -200,9 +200,9 @@ const Index = () => {
     JsBarcode("#barcode-${i}", "${labelData.barcodeValue}", {
       format: "CODE128",
       width: 1.8,
-      height: 25,
+      height: 15,
       displayValue: true,
-      fontSize: 10,
+      fontSize: 14,
       margin: 0,
       marginTop: 0,
       marginBottom: 0
@@ -231,6 +231,7 @@ const Index = () => {
           display: flex;
           flex-direction: row;
           width: ${totalPageWidth}px;
+          gap: 2mm;
         }
         .label {
           width: ${widthPx}px;
@@ -267,8 +268,9 @@ const Index = () => {
   // overflow: hidden;
 }
         .product-name {
-          font-size: 10px;
+          font-size: 8px;
           text-align: left;
+          font-weight: bold;
           // line-height: 1.1;
         }
         .price-row {
