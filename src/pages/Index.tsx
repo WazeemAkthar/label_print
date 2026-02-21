@@ -202,7 +202,7 @@ const Index = () => {
       width: 1.8,
       height: 15,
       displayValue: true,
-      fontSize: 14,
+      fontSize: 16,
       margin: 0,
       marginTop: 0,
       marginBottom: 0
@@ -229,8 +229,8 @@ const Index = () => {
         }
         .label-row {
           display: flex;
-          justify-content: space-evenly;
           flex-direction: row;
+          justify-content: space-evenly;
           width: ${totalPageWidth}px;
           gap: 2mm;
         }
